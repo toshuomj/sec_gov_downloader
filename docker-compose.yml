@@ -1,0 +1,67 @@
+version: '2.2'
+volumes:
+#  data-es01:
+#    driver: local
+  data-postgres:
+    driver: local
+services:
+#  corporate-reports-es:
+#    image: elasticsearch_7.4.0_langdetect
+#    container_name: corporate-reports-es01
+#    environment:
+#      - node.name=corporate-reports-es01
+#      - cluster.name=corporate-reports-cluster
+#      - cluster.initial_master_nodes=corporate-reports-es01
+#      - bootstrap.memory_lock=true
+#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+#    ulimits:
+#      memlock:
+#        soft: -1
+#        hard: -1
+#    volumes:
+#      - data-es01:/usr/share/elasticsearch/data
+#    ports:
+#      - 9200:9200
+#    networks:
+#      - elastic
+
+  sec-gov-postgres:
+    image: postgres
+    container_name: sec-gov
+    volumes:
+#      - ./data/postgres:/var/lib/postgresql/data
+      - data-postgres:/var/lib/postgresql/data
+      #      - ./sql/table_urls.sql:/docker-entrypoint-initdb.d/1-table_urls.sql
+      #      - ./sql/table_files.sql:/docker-entrypoint-initdb.d/2-table_files.sql
+      - ./sql/table_qtr_index.sql:/docker-entrypoint-initdb.d/1-table_qtr_index.sql
+      - ./sql/table_master_idx.sql:/docker-entrypoint-initdb.d/2-table_master_idx.sql
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=sec-gov
+    ports:
+      - '5432:5432'
+    networks:
+      - postgres
+
+  # kibana:
+  #   image: docker.elastic.co/kibana/kibana:7.4.0
+  #   container_name: kibana
+  #   environment:
+  #     ELASTICSEARCH_HOSTS: http://corporate-reports-es01:9200
+  #   ulimits:
+  #     memlock:
+  #       soft: -1
+  #       hard: -1
+  #   volumes:
+  #     - logs:/var/log
+  #   ports:
+  #     - 5601:5601
+  #   networks:
+  #     - elastic
+
+networks:
+#  elastic:
+#    driver: bridge
+  postgres:
+    driver: bridge
